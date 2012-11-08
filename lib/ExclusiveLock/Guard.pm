@@ -12,27 +12,48 @@ sub errstr { $ERRSTR }
 
 sub new {
     my($class, $filename, %args) = @_;
-    $ERRSTR = undef;
+    my $retry_count = $args{retry_count} || 5;
 
     my $fh;
-    unless (open $fh, '>', $filename) {
-        $ERRSTR = "failed to open file:$filename:$!";
-        return;
-    }
+    my $count = 0;
     my $is_locked = 1;
-    if ($args{nonblocking}) {
-        unless (flock $fh, LOCK_EX | LOCK_NB) {
-            if ($! != EWOULDBLOCK) {
+    while (1) {
+        $ERRSTR = undef;
+        $is_locked = 1;
+        unless (open $fh, '>', $filename) {
+            $ERRSTR = "failed to open file:$filename:$!";
+            return;
+        }
+        if ($args{nonblocking}) {
+            unless (flock $fh, LOCK_EX | LOCK_NB) {
+                if ($! != EWOULDBLOCK) {
+                    $ERRSTR = "failed to flock file:$filename:$!";
+                    return;
+                }
+                $is_locked = 0;
+            }
+        } else {
+            unless (flock $fh, LOCK_EX) {
                 $ERRSTR = "failed to flock file:$filename:$!";
                 return;
             }
-            $is_locked = 0;
         }
-    } else {
-        unless (flock $fh, LOCK_EX) {
-            $ERRSTR = "failed to flock file:$filename:$!";
-            return;
+        unless (-f $filename) {
+            unless (flock $fh, LOCK_UN) {
+                $ERRSTR = "failed to unlock flock file:$filename:$!";
+                return;
+            }
+            unless (close $fh) {
+                $ERRSTR = "failed to close file:$filename:$!";
+                return;
+            }
+            if ($retry_count && ++$count > $retry_count) {
+                $ERRSTR = "give up! $retry_count times retry to lock.";
+                return;
+            }
+            next;
         }
+        last;
     }
 
     bless {
@@ -50,14 +71,14 @@ sub DESTROY {
 
     my $fh       = delete $self->{fh};
     my $filename = delete $self->{filename};
+    unless (unlink $filename) {
+        warn "failed to unlink file:$filename:$!";
+    }
     unless (flock $fh, LOCK_UN) {
         warn "failed to unlock flock file:$filename:$!";
     }
     unless (close $fh) {
         warn "failed to close file:$filename:$!";
-    }
-    unless (unlink $filename) {
-        warn "failed to unlink file:$filename:$!";
     }
 }
 
