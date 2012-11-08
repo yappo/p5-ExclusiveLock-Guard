@@ -1,7 +1,7 @@
 package ExclusiveLock::Guard;
 use strict;
 use warnings;
-our $VERSION = '0.02';
+our $VERSION = '0.03';
 
 use Errno qw(EWOULDBLOCK);
 use Fcntl qw(LOCK_EX LOCK_NB LOCK_UN);
