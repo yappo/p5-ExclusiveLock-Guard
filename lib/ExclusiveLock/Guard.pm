@@ -3,26 +3,106 @@ use strict;
 use warnings;
 our $VERSION = '0.01';
 
+use Errno qw(EWOULDBLOCK);
+use Fcntl qw(LOCK_EX LOCK_NB LOCK_UN);
+
+my $ERRSTR;
+
+sub errstr { $ERRSTR }
+
+sub new {
+    my($class, $filename, %args) = @_;
+    $ERRSTR = undef;
+
+    my $fh;
+    unless (open $fh, '>', $filename) {
+        $ERRSTR = "failed to open file:$filename:$!";
+        return;
+    }
+    my $is_locked = 1;
+    if ($args{nonblocking}) {
+        unless (flock $fh, LOCK_EX | LOCK_NB) {
+            if ($! != EWOULDBLOCK) {
+                $ERRSTR = "failed to flock file:$filename:$!";
+                return;
+            }
+            $is_locked = 0;
+        }
+    } else {
+        unless (flock $fh, LOCK_EX) {
+            $ERRSTR = "failed to flock file:$filename:$!";
+            return;
+        }
+    }
+
+    bless {
+        filename  => $filename,
+        fh        => $fh,
+        is_locked => $is_locked,
+    }, $class;
+}
+
+sub is_locked { $_[0]->{is_locked} }
+
+sub DESTROY {
+    my $self = shift;
+    return unless $self->{is_locked};
+
+    my $fh       = delete $self->{fh};
+    my $filename = delete $self->{filename};
+    unless (flock $fh, LOCK_UN) {
+        warn "failed to unlock flock file:$filename:$!";
+    }
+    unless (close $fh) {
+        warn "failed to close file:$filename:$!";
+    }
+    unless (unlink $filename) {
+        warn "failed to unlink file:$filename:$!";
+    }
+}
+
 1;
 __END__
 
 =head1 NAME
 
-ExclusiveLock::Guard -
+ExclusiveLock::Guard - lexically-scoped lock management
 
 =head1 SYNOPSIS
 
     use ExclusiveLock::Guard;
 
+    sub blocking_transaction {
+        my $lock = ExclusiveLock::Guard->new('/tmp/foo.lock')
+            or die 'lock error: ' . ExclusiveLock::Guard->errstr;
+        # inner of lock
+    }
+    blocking_transaction();
+    # outer of lock
+
+for non-blocking
+
+    sub nonblocking_transaction {
+        my $lock = ExclusiveLock::Guard->new('/tmp/foo.lock', nonblocking => 1 )
+            or die 'lock error: ' . ExclusiveLock::Guard->errstr;
+        unless ($lock->is_locked) {
+            warn 'is locked';
+            return;
+        }
+
+        # inner of lock
+    }
+    nonblocking_transaction();
+    # outer of lock
+
 =head1 DESCRIPTION
 
-ExclusiveLock::Guard is
+ExclusiveLock::Guard is very simple lock maneger.
+To automatically create and remove the lock file.
 
 =head1 AUTHOR
 
 Kazuhiro Osawa E<lt>yappo {at} shibuya {dot} plE<gt>
-
-=head1 SEE ALSO
 
 =head1 LICENSE
 
