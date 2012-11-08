@@ -5,6 +5,7 @@ our $VERSION = '0.02';
 
 use Errno qw(EWOULDBLOCK);
 use Fcntl qw(LOCK_EX LOCK_NB LOCK_UN);
+use File::stat;
 
 my $ERRSTR;
 
@@ -38,7 +39,7 @@ sub new {
                 return;
             }
         }
-        unless (-f $filename) {
+        unless (-f $filename && stat($fh)->ino == stat($filename)->ino) {
             unless (flock $fh, LOCK_UN) {
                 $ERRSTR = "failed to unlock flock file:$filename:$!";
                 return;
