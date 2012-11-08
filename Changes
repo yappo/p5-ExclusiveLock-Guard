@@ -1,4 +1,8 @@
 Revision history for Perl extension ExclusiveLock::Guard
 
+0.02    2012-11-08T20:03:53+09:00
+        - fixed to unlink handling was wrong
+        - added to retry_count option for new mthod
+
 0.01    Thu Nov  8 15:18:43 2012
         - original version
