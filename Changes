@@ -1,5 +1,8 @@
 Revision history for Perl extension ExclusiveLock::Guard
 
+0.04    2013-01-21T19:21:15+09:00
+        - change of the file stat timing (measures under high load)
+
 0.03    2012-11-08T21:57:01+09:00
         - fixed to It had overlooked that inode of lock file had changed
 
