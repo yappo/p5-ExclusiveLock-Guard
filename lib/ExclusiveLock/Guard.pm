@@ -72,14 +72,27 @@ sub DESTROY {
 
     my $fh       = delete $self->{fh};
     my $filename = delete $self->{filename};
-    unless (unlink $filename) {
-        warn "failed to unlink file:$filename:$!";
-    }
-    unless (flock $fh, LOCK_UN) {
-        warn "failed to unlock flock file:$filename:$!";
-    }
     unless (close $fh) {
         warn "failed to close file:$filename:$!";
+        return;
+    }
+
+    # try unlink lock file
+    if (open my $unlink_fh, '<', $filename) { # else is unlinked lock file by another process?
+        # A
+        if (flock $unlink_fh, LOCK_EX | LOCK_NB) { # else is locked the file by another process
+            if (-f $filename && stat($unlink_fh)->ino == do { my $s = stat($filename); $s ? $s->ino : -1 }) { # else is unlink and create file by another process in the A timing
+                unless (unlink $filename) {
+                    warn "failed to unlink file:$filename:$!";
+                }
+                unless (flock $unlink_fh, LOCK_UN) {
+                    warn "failed to unlock flock file:$filename:$!";
+                }
+                unless (close $unlink_fh) {
+                    warn "failed to close file:$filename:$!";
+                }
+            }
+        }
     }
 }
 
