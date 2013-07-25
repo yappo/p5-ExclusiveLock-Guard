@@ -45,7 +45,7 @@
          }
       }
    },
-   "release_status" : "stable",
+   "release_status" : "testing",
    "resources" : {
       "bugtracker" : {
          "web" : "https://github.com/yappo/p5-ExclusiveLock-Guard/issues"
@@ -57,7 +57,7 @@
          "web" : "https://github.com/yappo/p5-ExclusiveLock-Guard"
       }
    },
-   "version" : "0.04",
+   "version" : "0.05",
    "x_contributors" : [
       "Kazuhiro Osawa <yappo@shibuya.pl>"
    ]
