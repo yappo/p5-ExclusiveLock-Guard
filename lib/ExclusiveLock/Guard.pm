@@ -126,6 +126,10 @@ To automatically create and remove the lock file.
 
 Kazuhiro Osawa E<lt>yappo {at} shibuya {dot} plE<gt>
 
+=head1 COPYRIGHT
+
+Copyright 2012- Kazuhiro Osawa
+
 =head1 LICENSE
 
 This library is free software; you can redistribute it and/or modify
