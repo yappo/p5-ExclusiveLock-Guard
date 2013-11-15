@@ -2,6 +2,10 @@ Revision history for Perl extension ExclusiveLock::Guard
 
 {{$NEXT}}
 
+0.06  2013-11-15 20:28:51 JST
+        - oops, 0.05-TRIAL is empty release...
+        - add fork process support. (reported by hirose31++, idea by kazuho++)
+
 0.05  2013-07-25 17:42:38 JST
         - add fork process support. (reported by hirose31++, idea by kazuho++)
         - milla migration
