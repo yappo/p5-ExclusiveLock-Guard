@@ -1,7 +1,7 @@
 package ExclusiveLock::Guard;
 use strict;
 use warnings;
-our $VERSION = '0.04';
+our $VERSION = '0.05';
 
 use Errno qw(EWOULDBLOCK);
 use Fcntl qw(LOCK_EX LOCK_NB LOCK_UN);
@@ -138,6 +138,10 @@ To automatically create and remove the lock file.
 =head1 AUTHOR
 
 Kazuhiro Osawa E<lt>yappo {at} shibuya {dot} plE<gt>
+
+=head1 COPYRIGHT
+
+Copyright 2012- Kazuhiro Osawa
 
 =head1 LICENSE
 

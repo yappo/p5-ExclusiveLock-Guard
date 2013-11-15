@@ -38,6 +38,10 @@ To automatically create and remove the lock file.
 
 Kazuhiro Osawa <yappo {at} shibuya {dot} pl>
 
+# COPYRIGHT
+
+Copyright 2012- Kazuhiro Osawa
+
 # LICENSE
 
 This library is free software; you can redistribute it and/or modify
