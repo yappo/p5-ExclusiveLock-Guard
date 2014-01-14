@@ -2,6 +2,9 @@ Revision history for Perl extension ExclusiveLock::Guard
 
 {{$NEXT}}
 
+0.07  2014-01-14 13:26:40 JST
+        - win32 is not support
+
 0.06  2013-11-15 20:28:51 JST
         - oops, 0.05-TRIAL is empty release...
         - add fork process support. (reported by hirose31++, idea by kazuho++)
